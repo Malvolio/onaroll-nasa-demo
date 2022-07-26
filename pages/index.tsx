@@ -9,17 +9,20 @@ import { theme as DatepickerTheme } from "../components/datepicker.theme";
 import { useRouter } from "next/router";
 import { parse, format } from "date-fns";
 import { DisplayApodMeta } from "../components/DisplayApodMeta";
-import { ApodFormat, fetcher } from "../apod";
+import { ApodFormat, fetchApod } from "../apod";
 
 const firstOf = (s: string | string[] | undefined): string =>
   s ? (typeof s === "string" ? s : s[0]) : "";
 
 const Home: NextPage = () => {
   const { query, push } = useRouter();
-  const date = query?.date
-    ? parse(firstOf(query?.date), ApodFormat, new Date())
-    : new Date();
-  const { data } = useSWR(date, fetcher);
+  const date = format(
+    query?.date
+      ? parse(firstOf(query?.date), ApodFormat, new Date())
+      : new Date(),
+    ApodFormat
+  );
+  const { data } = useSWR(date, fetchApod);
   const onChange = (d: Date) => {
     const date = format(d, ApodFormat);
     push({
@@ -51,7 +54,10 @@ const Home: NextPage = () => {
               />
             </Box>
             <Box>
-              <DatePanel value={date} onChange={onChange} />
+              <DatePanel
+                value={parse(date, ApodFormat, new Date())}
+                onChange={onChange}
+              />
               {data && <DisplayApodMeta apod={data} />}
             </Box>
           </SimpleGrid>

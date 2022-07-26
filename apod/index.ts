@@ -14,14 +14,14 @@ export type ApodRecord = {
   url: string;
 };
 
-export const fetcher = async (date: Date): Promise<ApodRecord | undefined> => {
+export const fetchApod = async (
+  date: string
+): Promise<ApodRecord | undefined> => {
   if (!date) {
     return;
   }
   const res = await fetch(
-    `https://api.nasa.gov/planetary/apod?api_key=${
-      process.env.NEXT_PUBLIC_API_KEY
-    }&date=${format(date, ApodFormat)}`
+    `https://api.nasa.gov/planetary/apod?api_key=${process.env.NEXT_PUBLIC_API_KEY}&date=${date}`
   );
   return (await res.json()) as ApodRecord;
 };
