@@ -22,17 +22,11 @@ const Home: NextPage = () => {
   const { data } = useSWR(date, fetcher);
   const onChange = (d: Date) => {
     const date = format(d, ApodFormat);
-    push(
-      {
-        query: {
-          date,
-        },
+    push({
+      query: {
+        date,
       },
-      undefined,
-      {
-        shallow: true,
-      }
-    );
+    });
   };
   return (
     <ChakraProvider theme={DatepickerTheme}>
