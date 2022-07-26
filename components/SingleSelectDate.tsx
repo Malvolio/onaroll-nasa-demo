@@ -33,7 +33,7 @@ import {
   parse,
   startOfMonth,
 } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   IoCalendarClearSharp,
   IoChevronBackSharp,
@@ -64,13 +64,25 @@ export const SingleSelectDate: React.FC<{
 
   const selectedDateFormat = "MM/dd/yyyy";
   const styles = useMultiStyleConfig("Datepicker", {});
-
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   // Only accept digits and forward slash as input.
   const onInputChange = (input: string) => {
     setInputValue(input.trim().replace(/[^\d/]+/g, ""));
+  };
+  const inputUpdated = useRef(() => {});
+  inputUpdated.current = () => {
+    if (onChange && inputValue) {
+      const newValue = parse(inputValue, selectedDateFormat, new Date());
+      if (
+        isValid(newValue) &&
+        format(newValue, selectedDateFormat) !==
+          (value && format(value, selectedDateFormat))
+      ) {
+        onChange(newValue);
+      }
+    }
   };
 
   // When the input field loses focus, we need to parse
@@ -127,6 +139,7 @@ export const SingleSelectDate: React.FC<{
       select(parsed, true);
     } else if (selected.length > 0) {
       setInputValue(format(selected[0], selectedDateFormat));
+      inputUpdated.current();
     } else {
       setInputValue("");
     }
@@ -139,18 +152,15 @@ export const SingleSelectDate: React.FC<{
       selected.length > 0 ? format(selected[0], selectedDateFormat) : ""
     );
     setViewing(selected.length > 0 ? selected[0] : new Date());
+    inputUpdated.current();
   }, [selected, setViewing]);
 
-  useEffect(() => {
-    if (onChange && inputValue) {
-      onChange(parse(inputValue, selectedDateFormat, new Date()));
-    }
-  }, [onChange, inputValue]);
   useEffect(() => {
     if (value) {
       setInputValue(format(value, selectedDateFormat));
     }
   }, [value]);
+
   return (
     <Box width={300}>
       <Popover isOpen={isOpen} onClose={() => setIsOpen(false)}>
